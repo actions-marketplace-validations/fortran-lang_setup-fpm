@@ -221,30 +221,29 @@ async function installFromSource(fpmVersion, fpmRepo){
 
     // If we found unversioned gfortran, check if it's gcc >= 14
     // If so, or if we didn't find unversioned gfortran, look for a versioned one <= 13
-    if (!foundGfortran || true) {  // Always prefer versioned <= 13 for compatibility
-      let foundVersioned = false;
-      for (const ver of [13, 12, 11, 10]) {
-        try {
-          await exec.exec('which', [`gfortran-${ver}`], { silent: true });
-          gfortranCmd = `gfortran-${ver}`;
-          foundVersioned = true;
-          console.log(`Found ${gfortranCmd}`);
-          break;
-        } catch (e) {
-          // Continue searching
-        }
+    // Always prefer versioned <= 13 for compatibility
+    let foundVersioned = false;
+    for (const ver of [13, 12, 11, 10]) {
+      try {
+        await exec.exec('which', [`gfortran-${ver}`], { silent: true });
+        gfortranCmd = `gfortran-${ver}`;
+        foundVersioned = true;
+        console.log(`Found ${gfortranCmd}`);
+        break;
+      } catch (e) {
+        // Continue searching
       }
+    }
 
-      if (!foundVersioned && !foundGfortran) {
-        core.setFailed(
-          'gfortran is required to build fpm from source on macOS ARM64.\n' +
-          'Please install gcc version 10-13 before running this action, for example:\n' +
-          '  - name: Install gfortran\n' +
-          '    run: brew install gcc@13\n' +
-          'Or use fortran-lang/setup-fortran to install a Fortran compiler.'
-        );
-        return;
-      }
+    if (!foundVersioned && !foundGfortran) {
+      core.setFailed(
+        'gfortran is required to build fpm from source on macOS ARM64.\n' +
+        'Please install gcc version 10-13 before running this action, for example:\n' +
+        '  - name: Install gfortran\n' +
+        '    run: brew install gcc@13\n' +
+        'Or use fortran-lang/setup-fortran to install a Fortran compiler.'
+      );
+      return;
     }
 
     const versionNumber = fpmVersion.replace('v', '');
